@@ -1,0 +1,175 @@
+{% extends 'admin/base_site.html' %}
+{% block content %}
+
+{% if request.user.is_authenticated and request.user.is_staff %}
+<html>
+
+<body style="width:100vw;display:flex;flex-direction: row; justify-content: center;gap:20px ">
+    <div style="width:45%">
+        <select name="type" id="type">
+            <option value="year">Ngày (day)</option>
+            <option value="month">Tháng (month)</option>
+        </select>
+        <div style="width:100%">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+    <div style="width:45%">
+        <select name="type" id="revenues">
+            <option value="year">Ngày (day)</option>
+            <option value="month">Tháng (month)</option>
+        </select>
+        <div style="width:100%">
+            <canvas id="myChartRevenues"></canvas>
+        </div>
+    </div>
+     {% elif not request.user.is_authenticated %}
+        <script>
+            window.location.href = "{% url 'admin:login' %}";
+        </script>
+    {% endif %}
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const choose = document.getElementById('type');
+        const chooseRevenues = document.getElementById('revenues');
+        const ctx = document.getElementById('myChart');
+        const ctx1 = document.getElementById('myChartRevenues');
+        var months = Array.from({ length: 12 }, (_, i) => i + 1);
+        var days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+        let mychart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Lượt đơn trong tháng',
+                    data: {{ orders_by_month }},
+            borderWidth: 1
+        }]
+    },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+  });
+
+        choose.addEventListener('change', function (event) {
+            mychart.destroy()
+            var selectedValue = event.target.value;
+            if (selectedValue == "month") {
+                mychart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Lượt đơn trong tháng',
+                            data: {{ orders_by_month }},
+                    borderWidth: 1
+                }]
+    },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+            }else {
+            mychart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Lượt đơn theo ngày',
+                        data: {{ orders_by_day }},
+                borderWidth: 1
+            }]
+    },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+  });
+            }
+        });
+
+        let mychartRevenues = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Doanh thu trong tháng',
+                    data: {{ revenues_by_month }},
+            borderWidth: 1
+        }]
+    },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+  });
+
+
+  chooseRevenues.addEventListener('change', function (event) {
+            mychartRevenues.destroy()
+            var selectedValue = event.target.value;
+            if (selectedValue == "month") {
+                mychartRevenues = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Doanh thu trong tháng',
+                            data: {{ revenues_by_month }},
+                    borderWidth: 1
+                }]
+    },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+            }else {
+            mychartRevenues = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Doanh thu theo ngày',
+                        data: {{ revenues_by_day }},
+                borderWidth: 1
+            }]
+    },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+  });
+            }
+        });
+
+    </script>
+</body>
+
+</html>
+
+{% endblock %}
